@@ -20,8 +20,16 @@ const HomeScreen = ({ navigation }) => {
             onPress={() => {
                 if (item.title === 'Profil') {
                     navigation.navigate('Profil');
+                } else if (item.title === 'Bilgilendirme') {
+                    navigation.navigate('Bilgilendirme');
+                } else if (item.title === 'Ön Testler') {
+                    navigation.navigate('OnTestler');
+                } else if (item.title === 'Son Testler') {
+                    navigation.navigate('SonTestler');
                 } else if (item.title === 'BKİ Hesaplama') {
                     navigation.navigate('BKI');
+                } else if (item.title === 'Besin Ekle') {
+                    navigation.navigate('BesinEkle');
                 } else if (item.title === 'Adımsayar') {
                     navigation.navigate('Adimsayar');
                 } else if (item.title === 'İletişim') {
