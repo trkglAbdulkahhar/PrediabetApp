@@ -93,5 +93,5 @@ Ayrıca, "İlaç Uyumu" (Medication Adherence) ve "Yaşam Tarzı Modifikasyonu" 
 
 ---
 
-> *Bu proje, [Adınız Soyadınız] tarafından [Ders/Proje Adı] kapsamında geliştirilmiştir.*
+> *Bu proje, Abdulkahhar Türkoğlu tarafından Mobil Uygulamalar dersi kapsamında geliştirilmiştir.*
 > *© 2026 GlucoPredia - Tüm Hakları Saklıdır.*
