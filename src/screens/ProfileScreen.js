@@ -1,7 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
-import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useContext } from 'react';
+import {
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { UserContext } from '../context/UserContext';
 
 const ProfileScreen = ({ navigation }) => {
+    const { user, logout } = useContext(UserContext);
+
+    const handleLogout = () => {
+        logout();
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#C62828" />
@@ -17,47 +33,46 @@ const ProfileScreen = ({ navigation }) => {
                 <Text style={styles.headerText}>Profil</Text>
             </View>
 
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={styles.keyboardView}
-            >
-                <ScrollView contentContainerStyle={styles.scrollContent}>
+            <ScrollView contentContainerStyle={styles.content}>
 
-                    {/* Logo/Icon Area */}
-                    <View style={styles.logoContainer}>
-                        <View style={styles.logoPlaceholder}>
-                            <Ionicons name="person-circle-outline" size={100} color="#C62828" />
+                <View style={styles.profileCard}>
+                    <View style={styles.avatarContainer}>
+                        <Ionicons name="person-circle-outline" size={100} color="#C62828" />
+                    </View>
+
+                    <Text style={styles.userName}>{user ? user.name : "Misafir"}</Text>
+                    <Text style={styles.userEmail}>{user ? user.email : "Giriş yapılmadı"}</Text>
+
+                    {user && user.riskScore !== null && (
+                        <View style={styles.statRow}>
+                            <Text style={styles.statLabel}>Risk Skoru:</Text>
+                            <Text style={styles.statValue}>%{user.riskScore}</Text>
                         </View>
-                    </View>
+                    )}
+                </View>
 
-                    {/* Form Inputs */}
-                    <View style={styles.formContainer}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Adı Soyadı"
-                            placeholderTextColor="#888"
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Telefon"
-                            placeholderTextColor="#888"
-                            keyboardType="phone-pad"
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Şifre"
-                            placeholderTextColor="#888"
-                            secureTextEntry={true}
-                        />
-                    </View>
-
-                    {/* Update Button */}
-                    <TouchableOpacity style={styles.updateButton}>
-                        <Text style={styles.updateButtonText}>Profili Güncelle</Text>
+                {/* Settings Section (Visual Only for now) */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Hesap Ayarları</Text>
+                    <TouchableOpacity style={styles.menuItem}>
+                        <Ionicons name="settings-outline" size={24} color="#555" />
+                        <Text style={styles.menuText}>Uygulama Ayarları</Text>
+                        <Ionicons name="chevron-forward" size={24} color="#999" />
                     </TouchableOpacity>
+                    <TouchableOpacity style={styles.menuItem}>
+                        <Ionicons name="notifications-outline" size={24} color="#555" />
+                        <Text style={styles.menuText}>Bildirimler</Text>
+                        <Ionicons name="chevron-forward" size={24} color="#999" />
+                    </TouchableOpacity>
+                </View>
 
-                </ScrollView>
-            </KeyboardAvoidingView>
+                {/* Logout Button */}
+                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                    <Ionicons name="log-out-outline" size={24} color="#FFFFFF" />
+                    <Text style={styles.logoutText}>Çıkış Yap</Text>
+                </TouchableOpacity>
+
+            </ScrollView>
         </SafeAreaView>
     );
 };
@@ -69,96 +84,108 @@ const styles = StyleSheet.create({
     },
     header: {
         backgroundColor: '#C62828',
-        paddingTop: 50,
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-        borderBottomLeftRadius: 35,
-        borderBottomRightRadius: 35,
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        flexDirection: 'row',
+        height: 120,
+        borderBottomLeftRadius: 50,
+        borderBottomRightRadius: 50,
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        zIndex: 1,
+        elevation: 5,
     },
     backButton: {
         position: 'absolute',
         left: 20,
-        top: 55,
-        zIndex: 10,
+        top: 45,
     },
     headerText: {
         color: '#FFFFFF',
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: 'bold',
-        letterSpacing: 1,
     },
-    keyboardView: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        alignItems: 'center',
+    content: {
         padding: 20,
     },
-    logoContainer: {
-        marginTop: 20,
-        marginBottom: 40,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    logoPlaceholder: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
+    profileCard: {
         backgroundColor: '#FFFFFF',
+        borderRadius: 20,
+        padding: 20,
         alignItems: 'center',
-        justifyContent: 'center',
         elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
+        marginBottom: 20,
     },
-    formContainer: {
-        width: '100%',
-        marginBottom: 30,
+    avatarContainer: {
+        marginBottom: 10,
     },
-    input: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 25,
-        padding: 15,
+    userName: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 5,
+    },
+    userEmail: {
         fontSize: 16,
+        color: '#666',
+        marginBottom: 15,
+    },
+    statRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFEBEE',
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        borderRadius: 20,
+    },
+    statLabel: {
+        color: '#C62828',
+        fontWeight: '600',
+        marginRight: 5,
+    },
+    statValue: {
+        color: '#C62828',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    section: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 15,
+        padding: 15,
+        marginBottom: 20,
+        elevation: 2,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
         color: '#333',
         marginBottom: 15,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        borderWidth: 1,
-        borderColor: 'transparent', // Can change on focus if needed
+        marginLeft: 5,
     },
-    updateButton: {
-        backgroundColor: '#C62828',
-        width: '100%',
-        padding: 15,
-        borderRadius: 30, // Fully rounded
+    menuItem: {
+        flexDirection: 'row',
         alignItems: 'center',
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
     },
-    updateButtonText: {
+    menuText: {
+        flex: 1,
+        marginLeft: 15,
+        fontSize: 16,
+        color: '#555',
+    },
+    logoutButton: {
+        backgroundColor: '#C62828',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 15,
+        borderRadius: 15,
+        elevation: 3,
+    },
+    logoutText: {
         color: '#FFFFFF',
         fontSize: 18,
         fontWeight: 'bold',
+        marginLeft: 10,
     },
 });
 

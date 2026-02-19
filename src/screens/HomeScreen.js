@@ -1,4 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useContext } from 'react';
 import { FlatList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { UserContext } from '../context/UserContext';
 
 const MENU_ITEMS = [
     { id: '1', title: 'Profil' },
@@ -14,6 +17,51 @@ const MENU_ITEMS = [
 ];
 
 const HomeScreen = ({ navigation }) => {
+    const { user } = useContext(UserContext);
+
+
+
+    const renderHeaderItem = () => {
+        const riskScore = user && user.riskScore !== null ? user.riskScore : 0;
+        let riskColor = '#4CAF50'; // Low Risk Green
+        let riskLabel = 'Düşük Risk';
+
+        if (riskScore > 30 && riskScore <= 60) {
+            riskColor = '#FF9800'; // Medium Risk Orange
+            riskLabel = 'Orta Risk';
+        } else if (riskScore > 60) {
+            riskColor = '#D32F2F'; // High Risk Red
+            riskLabel = 'Yüksek Risk';
+        }
+
+        return (
+            <View style={styles.headerContainer}>
+                <View style={styles.headerContent}>
+                    <Text style={styles.greetingText}>Merhaba,</Text>
+                    <Text style={styles.userNameText}>{user ? user.name : "Misafir"}</Text>
+
+                    <View style={[styles.riskCard, { backgroundColor: '#FFFFFF' }]}>
+                        <View style={styles.riskHeader}>
+                            <Ionicons name="pulse" size={24} color={riskColor} />
+                            <Text style={[styles.riskTitle, { color: riskColor }]}>Diyabet Risk Durumu</Text>
+                        </View>
+                        <Text style={[styles.riskLevel, { color: riskColor }]}>{riskLabel}</Text>
+                        <Text style={styles.riskDescription}>
+                            {user && user.riskScore !== null
+                                ? `Risk Oranı: %${riskScore}`
+                                : "Risk analizi için ön testi tamamlayın."}
+                        </Text>
+
+                        {/* Progress Bar */}
+                        <View style={styles.riskProgressBarBg}>
+                            <View style={[styles.riskProgressBarFill, { width: `${Math.min(riskScore, 100)}%`, backgroundColor: riskColor }]} />
+                        </View>
+                    </View>
+                </View>
+            </View>
+        );
+    };
+
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.card}
@@ -49,10 +97,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#C62828" />
 
-            {/* Custom Header */}
-            <View style={styles.header}>
-                <Text style={styles.headerText}>PREDIABET</Text>
-            </View>
+            {renderHeaderItem()}
 
             {/* Menu Grid */}
             <FlatList
@@ -75,8 +120,8 @@ const styles = StyleSheet.create({
     },
     header: {
         backgroundColor: '#C62828',
-        paddingTop: 60, // Extra padding for status bar area
-        paddingBottom: 30,
+        paddingTop: 50, // Extra padding for status bar area
+        paddingBottom: 40,
         paddingHorizontal: 20,
         borderBottomLeftRadius: 35,
         borderBottomRightRadius: 35,
@@ -93,7 +138,40 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         letterSpacing: 1,
+        marginBottom: 5,
     },
+    subHeaderText: {
+        color: '#FFEBEE',
+        fontSize: 16,
+        marginBottom: 15,
+    },
+    riskCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        borderRadius: 15,
+        padding: 20,
+        marginTop: 20,
+        width: '100%',
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    riskHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+    riskTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    riskValue: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    // List Specific Styles
     listContent: {
         paddingHorizontal: 10,
         paddingBottom: 20,
@@ -101,17 +179,17 @@ const styles = StyleSheet.create({
     columnWrapper: {
         justifyContent: 'space-between',
         paddingHorizontal: 20,
-        marginBottom: 15, // Low spacing between rows
+        marginBottom: 15,
     },
     card: {
         backgroundColor: '#FFFFFF',
-        width: '45%', // Approximately 42-45% as requested
+        width: '45%',
         height: 90,
         borderRadius: 15,
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 4, // Android shadow
-        shadowColor: '#000', // iOS shadow
+        elevation: 4,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 3,
@@ -121,6 +199,58 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         textAlign: 'center',
+    },
+    // New Header Styles
+    headerContainer: {
+        backgroundColor: '#C62828',
+        paddingTop: 50,
+        paddingBottom: 40,
+        paddingHorizontal: 20,
+        borderBottomLeftRadius: 35,
+        borderBottomRightRadius: 35,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        marginBottom: 20,
+    },
+    headerContent: {
+        alignItems: 'flex-start',
+        width: '100%',
+    },
+    greetingText: {
+        color: '#FFEBEE',
+        fontSize: 16,
+        marginBottom: 2,
+    },
+    userNameText: {
+        color: '#FFFFFF',
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 15,
+    },
+    riskLevel: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginTop: 5,
+        marginBottom: 5,
+    },
+    riskDescription: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 15,
+    },
+    riskProgressBarBg: {
+        height: 8,
+        backgroundColor: '#E0E0E0',
+        borderRadius: 4,
+        overflow: 'hidden',
+        width: '100%',
+    },
+    riskProgressBarFill: {
+        height: '100%',
+        borderRadius: 4,
     },
 });
 

@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useContext, useState } from 'react';
+import { Alert, FlatList, KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { UserContext } from '../context/UserContext'; // Assuming UserContext is in this path
 
 const AddFoodScreen = ({ navigation }) => {
+    const { foodList, addFood, removeFood } = useContext(UserContext);
     const [foodName, setFoodName] = useState('');
     const [calories, setCalories] = useState('');
 
@@ -12,13 +14,25 @@ const AddFoodScreen = ({ navigation }) => {
             return;
         }
 
-        // Here you would typically save to state/database
+        addFood(foodName, calories);
         Alert.alert("Başarılı", `${foodName} (${calories} kcal/miktar) başarıyla eklendi!`);
 
         // Clear inputs
         setFoodName('');
         setCalories('');
     };
+
+    const renderFoodItem = ({ item }) => (
+        <View style={styles.foodItem}>
+            <View>
+                <Text style={styles.foodName}>{item.name}</Text>
+                <Text style={styles.foodCalories}>{item.calories} kcal/miktar</Text>
+            </View>
+            <TouchableOpacity onPress={() => removeFood(item.id)} style={styles.deleteButton}>
+                <Ionicons name="trash-outline" size={24} color="#F44336" />
+            </TouchableOpacity>
+        </View>
+    );
 
     return (
         <SafeAreaView style={styles.container}>
@@ -39,7 +53,7 @@ const AddFoodScreen = ({ navigation }) => {
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.keyboardView}
             >
-                <ScrollView contentContainerStyle={styles.scrollContent}>
+                <View style={styles.contentContainer}>
 
                     <View style={styles.formContainer}>
                         <Text style={styles.label}>Besin Adı</Text>
@@ -66,7 +80,19 @@ const AddFoodScreen = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
 
-                </ScrollView>
+                    <Text style={styles.listHeader}>Eklenen Besinler</Text>
+
+                    <FlatList
+                        data={foodList}
+                        renderItem={renderFoodItem}
+                        keyExtractor={item => item.id}
+                        contentContainerStyle={styles.listContent}
+                        ListEmptyComponent={
+                            <Text style={styles.emptyText}>Henüz besin eklemediniz.</Text>
+                        }
+                    />
+
+                </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -110,10 +136,9 @@ const styles = StyleSheet.create({
     keyboardView: {
         flex: 1,
     },
-    scrollContent: {
+    contentContainer: {
+        flex: 1,
         padding: 20,
-        paddingTop: 40,
-        alignItems: 'center',
     },
     formContainer: {
         width: '100%',
@@ -125,6 +150,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
+        marginBottom: 20,
     },
     label: {
         fontSize: 16,
@@ -139,7 +165,7 @@ const styles = StyleSheet.create({
         padding: 15,
         fontSize: 16,
         color: '#333',
-        marginBottom: 20,
+        marginBottom: 15, // Reduced margin
         borderWidth: 1,
         borderColor: '#E0E0E0',
     },
@@ -148,7 +174,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         paddingVertical: 15,
         alignItems: 'center',
-        marginTop: 10,
+        marginTop: 5,
         elevation: 2,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -159,6 +185,49 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 18,
         fontWeight: 'bold',
+    },
+    listHeader: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 10,
+        marginLeft: 5,
+    },
+    listContent: {
+        paddingBottom: 20,
+    },
+    foodItem: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 15,
+        padding: 15,
+        marginBottom: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+    },
+    foodName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    foodCalories: {
+        fontSize: 14,
+        color: '#666',
+    },
+    deleteButton: {
+        padding: 5,
+    },
+    emptyText: {
+        textAlign: 'center',
+        color: '#999',
+        fontSize: 16,
+        marginTop: 20,
+        fontStyle: 'italic',
     },
 });
 
