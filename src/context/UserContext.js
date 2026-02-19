@@ -6,7 +6,7 @@ export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
     // Current User Session
-    const [user, setUser] = useState(null); // { name, email, riskScore }
+    const [user, setUser] = useState(null); // { name, email, riskScore, complianceScore }
 
     // Food List State
     const [foodList, setFoodList] = useState([]);
@@ -41,18 +41,58 @@ export const UserProvider = ({ children }) => {
         try {
             const storedFood = await AsyncStorage.getItem(`foodList_${email}`);
             const storedRisk = await AsyncStorage.getItem(`riskScore_${email}`);
+            const storedCompliance = await AsyncStorage.getItem(`complianceScore_${email}`);
             const storedSteps = await AsyncStorage.getItem(`dailySteps_${email}`);
+            const storedHistory = await AsyncStorage.getItem(`activityHistory_${email}`);
+            const storedLastDate = await AsyncStorage.getItem(`lastSyncDate_${email}`);
 
             if (storedFood) setFoodList(JSON.parse(storedFood));
-            else setFoodList([]); // Reset if empty for this user
+            else setFoodList([]);
 
-            // Update user state with specific risk score if it exists, otherwise keep what's in session
-            if (storedRisk) {
-                setUser(prev => ({ ...prev, riskScore: JSON.parse(storedRisk) }));
+            // Initialize User State Updates
+            let updates = {};
+
+            if (storedRisk) updates.riskScore = JSON.parse(storedRisk);
+            if (storedCompliance) updates.complianceScore = JSON.parse(storedCompliance);
+
+            // History & Date Logic
+            let history = storedHistory ? JSON.parse(storedHistory) : [];
+            let lastDate = storedLastDate || new Date().toISOString().split('T')[0];
+            let currentSteps = storedSteps ? parseInt(storedSteps) : 0;
+
+            // --- DAY CHANGE CHECK ---
+            const today = new Date().toISOString().split('T')[0];
+
+            // DEBUG: Uncomment to simulate a new day
+            // const today = "2026-02-20"; 
+
+            if (lastDate !== today) {
+                console.log(`[UserContext] Day changed from ${lastDate} to ${today}. Archiving steps.`);
+
+                // Archive yesterday's (or last recorded day's) steps
+                if (currentSteps > 0) {
+                    history.push({ date: lastDate, steps: currentSteps });
+                    await AsyncStorage.setItem(`activityHistory_${email}`, JSON.stringify(history));
+                }
+
+                // Reset for today
+                currentSteps = 0;
+                lastDate = today;
+
+                await AsyncStorage.setItem(`dailySteps_${email}`, JSON.stringify(0));
+                await AsyncStorage.setItem(`lastSyncDate_${email}`, today);
             }
+            // ------------------------
 
-            if (storedSteps) setDailySteps(parseInt(storedSteps));
-            else setDailySteps(0); // Reset
+            setDailySteps(currentSteps);
+
+            // Update user state with all loaded info
+            setUser(prev => ({
+                ...prev,
+                ...updates,
+                activityHistory: history,
+                lastSyncDate: lastDate
+            }));
 
         } catch (error) {
             console.error("User data load error", error);
@@ -97,7 +137,7 @@ export const UserProvider = ({ children }) => {
                 console.log("[UserContext] User found!", foundUser);
 
                 // Remove password from session state for security
-                const sessionUser = { name: foundUser.name, email: foundUser.email, riskScore: null }; // Reset risk score initially
+                const sessionUser = { name: foundUser.name, email: foundUser.email, riskScore: null, complianceScore: null }; // Reset scores initially until loaded
 
                 setUser(sessionUser);
                 await AsyncStorage.setItem('currentUser', JSON.stringify(sessionUser));
@@ -173,6 +213,21 @@ export const UserProvider = ({ children }) => {
         }
     };
 
+    // Data: Update Compliance
+    const updateComplianceScore = async (score) => {
+        if (!user) return;
+        try {
+            const updatedUser = { ...user, complianceScore: score };
+            setUser(updatedUser);
+            // Update current user session
+            await AsyncStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            // Save isolated compliance score
+            await AsyncStorage.setItem(`complianceScore_${user.email}`, JSON.stringify(score));
+        } catch (error) {
+            console.error("Update compliance error", error);
+        }
+    };
+
     // Data: Daily Steps
     const [dailySteps, setDailySteps] = useState(0);
 
@@ -196,6 +251,7 @@ export const UserProvider = ({ children }) => {
                 register,
                 logout,
                 updateRiskScore,
+                updateComplianceScore,
                 addFood,
                 removeFood,
                 dailySteps,

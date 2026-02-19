@@ -1,13 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useContext } from 'react';
 import {
+    Image,
     SafeAreaView,
     ScrollView,
     StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { UserContext } from '../context/UserContext';
 
@@ -36,6 +37,11 @@ const ProfileScreen = ({ navigation }) => {
             <ScrollView contentContainerStyle={styles.content}>
 
                 <View style={styles.profileCard}>
+                    <Image
+                        source={require('../../assets/images/Logo.png')}
+                        style={styles.profileLogo}
+                        resizeMode="contain"
+                    />
                     <View style={styles.avatarContainer}>
                         <Ionicons name="person-circle-outline" size={100} color="#C62828" />
                     </View>
@@ -112,6 +118,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         elevation: 3,
         marginBottom: 20,
+        position: 'relative',
+    },
+    profileLogo: {
+        width: 40,
+        height: 40,
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        opacity: 0.8,
     },
     avatarContainer: {
         marginBottom: 10,

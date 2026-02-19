@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useContext, useState } from 'react';
 import {
     Alert,
+    Image,
     KeyboardAvoidingView,
     Platform,
     SafeAreaView,
@@ -10,7 +11,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { UserContext } from '../context/UserContext';
 
@@ -53,6 +54,15 @@ const RegisterScreen = ({ navigation }) => {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.content}
             >
+                <View style={styles.logoContainer}>
+                    <Image
+                        source={require('../../assets/images/Logo.png')}
+                        style={styles.logoImage}
+                        resizeMode="contain"
+                    />
+                    <Text style={styles.logoText}>GLUCOPREDIA</Text>
+                </View>
+
                 <View style={styles.formContainer}>
                     <Text style={styles.label}>İsim Soyisim</Text>
                     <TextInput
@@ -129,6 +139,21 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         paddingHorizontal: 30,
+    },
+    logoContainer: {
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    logoImage: {
+        width: 100,
+        height: 100,
+    },
+    logoText: {
+        color: '#C62828',
+        fontWeight: '900',
+        fontSize: 18,
+        letterSpacing: 1,
+        marginTop: 5,
     },
     formContainer: {
         backgroundColor: '#FFFFFF',

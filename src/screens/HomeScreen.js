@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useContext } from 'react';
-import { FlatList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { UserContext } from '../context/UserContext';
 
 const MENU_ITEMS = [
@@ -23,38 +23,99 @@ const HomeScreen = ({ navigation }) => {
 
     const renderHeaderItem = () => {
         const riskScore = user && user.riskScore !== null ? user.riskScore : 0;
-        let riskColor = '#4CAF50'; // Low Risk Green
-        let riskLabel = 'Düşük Risk';
+        const complianceScore = user && user.complianceScore !== null ? user.complianceScore : 0;
+        const steps = user && user.dailySteps ? user.dailySteps : 0; // Assuming steps are in user for now or handled via context
 
-        if (riskScore > 30 && riskScore <= 60) {
-            riskColor = '#FF9800'; // Medium Risk Orange
-            riskLabel = 'Orta Risk';
-        } else if (riskScore > 60) {
-            riskColor = '#D32F2F'; // High Risk Red
-            riskLabel = 'Yüksek Risk';
-        }
+        // Risk Logic
+        let riskColor = '#4CAF50';
+        let riskLabel = 'Düşük';
+        if (riskScore > 30 && riskScore <= 60) { riskColor = '#FF9800'; riskLabel = 'Orta'; }
+        else if (riskScore > 60) { riskColor = '#D32F2F'; riskLabel = 'Yüksek'; }
+
+        // Compliance Logic
+        let complianceColor = '#D32F2F';
+        if (complianceScore >= 50) complianceColor = '#FF9800';
+        if (complianceScore >= 80) complianceColor = '#4CAF50';
+
+        // Dynamic Recommendation
+        let recommendation = "Veri bekleniyor...";
+        if (riskScore > 60) recommendation = "Risk düzeyiniz yüksek. Lütfen doktor kontrolünü ihmal etmeyin.";
+        else if (complianceScore > 0 && complianceScore < 50) recommendation = "Tedavi uyumunuz düşük. Planınıza sadık kalmalısınız.";
+        else if (riskScore > 30) recommendation = "Dikkatli olun. Şeker tüketimini azaltıp hareketi artırın.";
+        else recommendation = "Harikasınız! Değerleriniz stabil, aynen devam.";
+
+        if (user && user.riskScore === null) recommendation = "Risk analizi için lütfen önce 'Ön Test'i tamamlayın.";
 
         return (
             <View style={styles.headerContainer}>
                 <View style={styles.headerContent}>
-                    <Text style={styles.greetingText}>Merhaba,</Text>
-                    <Text style={styles.userNameText}>{user ? user.name : "Misafir"}</Text>
-
-                    <View style={[styles.riskCard, { backgroundColor: '#FFFFFF' }]}>
-                        <View style={styles.riskHeader}>
-                            <Ionicons name="pulse" size={24} color={riskColor} />
-                            <Text style={[styles.riskTitle, { color: riskColor }]}>Diyabet Risk Durumu</Text>
+                    <View style={styles.headerTopRow}>
+                        <View>
+                            <Text style={styles.greetingText}>Merhaba,</Text>
+                            <Text style={styles.userNameText}>{user ? user.name : "Misafir"}</Text>
                         </View>
-                        <Text style={[styles.riskLevel, { color: riskColor }]}>{riskLabel}</Text>
-                        <Text style={styles.riskDescription}>
-                            {user && user.riskScore !== null
-                                ? `Risk Oranı: %${riskScore}`
-                                : "Risk analizi için ön testi tamamlayın."}
-                        </Text>
+                        <Image
+                            source={require('../../assets/images/Logo.png')}
+                            style={styles.headerLogo}
+                            resizeMode="contain"
+                        />
+                    </View>
 
-                        {/* Progress Bar */}
-                        <View style={styles.riskProgressBarBg}>
-                            <View style={[styles.riskProgressBarFill, { width: `${Math.min(riskScore, 100)}%`, backgroundColor: riskColor }]} />
+                    {/* Report Grid */}
+                    <View style={styles.reportGrid}>
+                        {/* Row 1: Risk & Compliance */}
+                        <View style={styles.row}>
+                            {/* Risk Card */}
+                            <View style={[styles.reportCard, { backgroundColor: '#FFF' }]}>
+                                <View style={styles.cardHeader}>
+                                    <Ionicons name="pulse" size={20} color={riskColor} />
+                                    <Text style={[styles.cardTitle, { color: riskColor }]}>Risk</Text>
+                                </View>
+                                <Text style={styles.cardValue}>%{riskScore}</Text>
+                                <Text style={[styles.cardLabel, { color: riskColor }]}>{riskLabel}</Text>
+                            </View>
+
+                            {/* Compliance Card */}
+                            <View style={[styles.reportCard, { backgroundColor: '#FFF' }]}>
+                                <View style={styles.cardHeader}>
+                                    <Ionicons name="checkmark-circle" size={20} color={complianceColor} />
+                                    <Text style={[styles.cardTitle, { color: complianceColor }]}>Uyum</Text>
+                                </View>
+                                <Text style={styles.cardValue}>%{complianceScore}</Text>
+                                <View style={styles.progressBarBg}>
+                                    <View style={[styles.progressBarFill, { width: `${complianceScore}%`, backgroundColor: complianceColor }]} />
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Row 2: Activity & Recommendation */}
+                        <View style={styles.row}>
+                            {/* Activity Card */}
+                            <View style={[styles.reportCard, { backgroundColor: '#FFF' }]}>
+                                <View style={styles.cardHeader}>
+                                    <Ionicons name="walk" size={20} color="#2196F3" />
+                                    <Text style={[styles.cardTitle, { color: '#2196F3' }]}>Adım</Text>
+                                </View>
+                                <Text style={styles.cardValue}>{steps}</Text>
+                                <Text style={styles.cardSub}>Bugünkü Adım</Text>
+                            </View>
+
+                            {/* Doctor Recommendation */}
+                            <TouchableOpacity
+                                style={[styles.reportCard, { backgroundColor: '#F3E5F5', flex: 1.5, borderColor: '#9C27B0', borderWidth: 0.5 }]}
+                                onPress={() => navigation.navigate('AnalizRaporu')}
+                            >
+                                <View style={styles.cardHeader}>
+                                    <Ionicons name="medkit" size={20} color="#9C27B0" />
+                                    <Text style={[styles.cardTitle, { color: '#9C27B0' }]}>Klinik Rapor</Text>
+                                </View>
+                                <Text style={[styles.recommendationText, { fontWeight: '600', color: '#6A1B9A' }]} numberOfLines={3}>
+                                    Detaylı sağlık analizi ve doktor önerilerini görüntülemek için tıklayınız.
+                                </Text>
+                                <View style={{ alignItems: 'flex-end', marginTop: 5 }}>
+                                    <Ionicons name="arrow-forward-circle" size={24} color="#9C27B0" />
+                                </View>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>
@@ -145,31 +206,90 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 15,
     },
-    riskCard: {
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        borderRadius: 15,
-        padding: 20,
-        marginTop: 20,
+    // Report Grid Styles
+    reportGrid: {
         width: '100%',
+        gap: 10,
+    },
+    row: {
+        flexDirection: 'row',
+        gap: 10,
+        marginBottom: 10,
+    },
+    reportCard: {
+        flex: 1,
+        padding: 15,
+        borderRadius: 15,
         elevation: 3,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowRadius: 3,
+        justifyContent: 'space-between',
+        minHeight: 110,
     },
-    riskHeader: {
+    cardHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 5,
     },
-    riskTitle: {
-        fontSize: 16,
+    cardTitle: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        marginLeft: 5,
+    },
+    cardValue: {
+        fontSize: 22,
         fontWeight: 'bold',
         color: '#333',
+        marginVertical: 5,
     },
-    riskValue: {
-        fontSize: 16,
+    cardLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    cardSub: {
+        fontSize: 12,
+        color: '#757575',
+    },
+    recommendationText: {
+        fontSize: 13,
+        color: '#555',
+        lineHeight: 18,
+    },
+    progressBarBg: {
+        height: 6,
+        backgroundColor: '#E0E0E0',
+        borderRadius: 3,
+        width: '100%',
+        marginTop: 5,
+    },
+    // Activity Stats Styles
+    activityStats: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        marginTop: 10,
+        paddingTop: 5,
+        borderTopWidth: 1,
+        borderTopColor: '#F5F5F5',
+    },
+    statItem: {
+        alignItems: 'center',
+    },
+    statLabel: {
+        fontSize: 10,
+        color: '#9E9E9E',
+    },
+    statValue: {
+        fontSize: 12,
         fontWeight: 'bold',
+        color: '#616161',
+    },
+    verticalLine: {
+        width: 1,
+        height: 20,
+        backgroundColor: '#EEEEEE',
     },
     // List Specific Styles
     listContent: {
@@ -200,6 +320,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         textAlign: 'center',
     },
+
     // New Header Styles
     headerContainer: {
         backgroundColor: '#C62828',
@@ -216,8 +337,20 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     headerContent: {
-        alignItems: 'flex-start',
         width: '100%',
+    },
+    headerTopRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 10,
+    },
+    headerLogo: {
+        width: 50,
+        height: 50,
+        backgroundColor: '#FFF',
+        borderRadius: 25,
     },
     greetingText: {
         color: '#FFEBEE',
@@ -229,28 +362,6 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 15,
-    },
-    riskLevel: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginTop: 5,
-        marginBottom: 5,
-    },
-    riskDescription: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 15,
-    },
-    riskProgressBarBg: {
-        height: 8,
-        backgroundColor: '#E0E0E0',
-        borderRadius: 4,
-        overflow: 'hidden',
-        width: '100%',
-    },
-    riskProgressBarFill: {
-        height: '100%',
-        borderRadius: 4,
     },
 });
 

@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 import {
     Alert,
+    Image,
     KeyboardAvoidingView,
     Platform,
     SafeAreaView,
@@ -45,9 +46,12 @@ const LoginScreen = ({ navigation }) => {
                 style={styles.content}
             >
                 <View style={styles.logoContainer}>
-                    <View style={styles.logoPlaceholder}>
-                        <Text style={styles.logoText}>PREDIABE-TR</Text>
-                    </View>
+                    <Image
+                        source={require('../../assets/images/Logo.png')}
+                        style={styles.logoImage}
+                        resizeMode="contain"
+                    />
+                    <Text style={styles.logoText}>GLUCOPREDIA</Text>
                 </View>
 
                 <View style={styles.formContainer}>
@@ -118,23 +122,18 @@ const styles = StyleSheet.create({
     },
     logoContainer: {
         alignItems: 'center',
-        marginBottom: 50,
+        marginBottom: 40,
     },
-    logoPlaceholder: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        backgroundColor: '#FFFFFF',
-        alignItems: 'center',
-        justifyContent: 'center',
-        elevation: 5,
-        borderWidth: 2,
-        borderColor: '#C62828',
+    logoImage: {
+        width: 150,
+        height: 150,
+        marginBottom: 10,
     },
     logoText: {
         color: '#C62828',
-        fontWeight: 'bold',
-        fontSize: 14,
+        fontWeight: '900',
+        fontSize: 22,
+        letterSpacing: 2,
     },
     formContainer: {
         backgroundColor: '#FFFFFF',

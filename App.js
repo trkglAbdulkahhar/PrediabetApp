@@ -5,6 +5,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { UserContext, UserProvider } from './src/context/UserContext';
 import AboutScreen from './src/screens/AboutScreen';
 import AddFoodScreen from './src/screens/AddFoodScreen';
+import AnalysisReportScreen from './src/screens/AnalysisReportScreen';
 import BkiScreen from './src/screens/BkiScreen';
 import ContactScreen from './src/screens/ContactScreen';
 import FaqScreen from './src/screens/FaqScreen';
@@ -51,6 +52,7 @@ const AppNavigator = () => {
                         <Stack.Screen name="OnTestler" component={PreTestScreen} options={{ headerShown: false }} />
                         <Stack.Screen name="BesinEkle" component={AddFoodScreen} options={{ headerShown: false }} />
                         <Stack.Screen name="SonTestler" component={PostTestScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="AnalizRaporu" component={AnalysisReportScreen} options={{ headerShown: false }} />
                     </>
                 ) : (
                     // User is NOT logged in -> Show Auth Stack

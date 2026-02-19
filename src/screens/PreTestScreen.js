@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Dimensions,
@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 
 import { UserContext } from '../context/UserContext';
+import { PRE_TEST_POOL, getRandomQuestions } from '../data/questionPool';
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -23,40 +24,36 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 const { width } = Dimensions.get('window');
 
-const QUESTIONS = [
-    { id: 1, text: "Ailenizde (anne, baba, kardeş) diyabet hastası var mı?", riskAnswer: true },
-    { id: 2, text: "Vücut Kitle İndeksiniz (BKİ) 25'in üzerinde mi?", riskAnswer: true },
-    { id: 3, text: "Bel çevreniz erkeklerde 102 cm, kadınlarda 88 cm'den geniş mi?", riskAnswer: true },
-    { id: 4, text: "Yüksek tansiyon şikayetiniz var mı veya bunun için ilaç kullanıyor musunuz?", riskAnswer: true },
-    { id: 5, text: "Haftada en az 3 gün tempolu egzersiz yapıyor musunuz?", riskAnswer: false }, // Inverse Logic: 'Hayır' is risk
-    { id: 6, text: "Daha önce doktorunuz tarafından kan şekerinizin yüksek olduğu söylendi mi?", riskAnswer: true },
-    { id: 7, text: "Günde en az bir porsiyon taze sebze veya meyve tüketiyor musunuz?", riskAnswer: false }, // Inverse Logic
-    { id: 8, text: "45 yaşın üzerinde misiniz?", riskAnswer: true },
-    { id: 9, text: "Kadınsanız: Gebelik diyabeti geçirdiniz mi veya 4 kg üzeri bebek doğurdunuz mu? (Erkekler 'Hayır' diyebilir)", riskAnswer: true },
-    { id: 10, text: "Gün içinde çok sık susuyor ve ağız kuruluğu yaşıyor musunuz?", riskAnswer: true },
-    { id: 11, text: "Geceleri sık idrara çıkıyor musunuz?", riskAnswer: true },
-    { id: 12, text: "Son zamanlarda açıklanamayan kilo kaybı veya aşırı iştah artışı yaşadınız mı?", riskAnswer: true },
-    { id: 13, text: "Yemeklerden sonra üzerinize ani bir ağırlık veya uyku çöküyor mu?", riskAnswer: true },
-    { id: 14, text: "Vücudunuzda açılan yaralar normalden daha geç mi iyileşiyor?", riskAnswer: true },
-    { id: 15, text: "Ellerinizde veya ayaklarınızda uyuşma, karıncalanma hissediyor musunuz?", riskAnswer: true },
-    { id: 16, text: "Görmenizde bulanıklık veya odaklanma sorunu yaşıyor musunuz?", riskAnswer: true },
-    { id: 17, text: "Cildinizde, özellikle boyun veya koltuk altında koyulaşma var mı?", riskAnswer: true },
-    { id: 18, text: "Canınız sık sık tatlı veya hamur işi türü gıdalar çekiyor mu?", riskAnswer: true },
-    { id: 19, text: "Kendinizi sürekli yorgun veya halsiz hissediyor musunuz?", riskAnswer: true },
-    { id: 20, text: "Günlük hayatta yüksek stres altında mısınız?", riskAnswer: true },
-];
+
 
 const PreTestScreen = ({ navigation }) => {
     const { updateRiskScore } = useContext(UserContext);
 
+    const [questions, setQuestions] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [score, setScore] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
     const [loadingResult, setLoadingResult] = useState(false);
 
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            // Reset state when screen comes into focus
+            setCurrentIndex(0);
+            setScore(0);
+            setIsFinished(false);
+            setLoadingResult(false);
+
+            // Get fresh random questions
+            const selected = getRandomQuestions(PRE_TEST_POOL, 20);
+            setQuestions(selected);
+        });
+
+        return unsubscribe;
+    }, [navigation]);
+
     const handleAnswer = (answer) => {
         // Calculate score for this question
-        const currentQuestion = QUESTIONS[currentIndex];
+        const currentQuestion = questions[currentIndex];
         let points = 0;
 
         if (answer === currentQuestion.riskAnswer) {
@@ -68,7 +65,7 @@ const PreTestScreen = ({ navigation }) => {
         // Animate transition
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
-        if (currentIndex < QUESTIONS.length - 1) {
+        if (currentIndex < questions.length - 1) {
             setScore(newScore);
             setCurrentIndex(currentIndex + 1);
         } else {
@@ -158,9 +155,18 @@ const PreTestScreen = ({ navigation }) => {
         );
     }
 
+    // Loading check
+    if (questions.length === 0) {
+        return (
+            <SafeAreaView style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#C62828" />
+            </SafeAreaView>
+        );
+    }
+
     // Progress Calculation
-    const progress = ((currentIndex + 1) / QUESTIONS.length) * 100;
-    const currentQuestion = QUESTIONS[currentIndex];
+    const progress = ((currentIndex + 1) / questions.length) * 100;
+    const currentQuestion = questions[currentIndex];
 
     return (
         <SafeAreaView style={styles.container}>
@@ -171,7 +177,7 @@ const PreTestScreen = ({ navigation }) => {
                 <View style={styles.progressBarContainer}>
                     <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
                 </View>
-                <Text style={styles.progressText}>Soru {currentIndex + 1} / {QUESTIONS.length}</Text>
+                <Text style={styles.progressText}>Soru {currentIndex + 1} / {questions.length}</Text>
             </View>
 
             {/* Content Body */}
