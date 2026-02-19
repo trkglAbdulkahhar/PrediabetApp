@@ -1,50 +1,62 @@
-# Welcome to your Expo app 👋
+# PREDIABE-TR | Mobil Diyabet Takip ve Bilgilendirme Sistemi
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## 🎯 Proje Amacı
+**PREDIABE-TR**, prediyabet (gizli şeker) tanısı almış veya risk grubundaki bireyler için özel olarak geliştirilmiş kapsamlı bir mobil sağlık asistanıdır. Uygulama, kullanıcıların kan şekeri takibini kolaylaştırmayı, vücut kitle indeksi (BKİ) hesaplamalarını yapabilmelerini, adım sayılarını takip ederek aktif kalmalarını ve sağlıklı yaşam konusunda doğru bilgiye ulaşmalarını hedefler. Tüm bu özellikler, kullanıcı dostu ve erişilebilir bir arayüz ile tek bir çatı altında sunulur.
 
-## Get started
+## 🛠️ Teknik Özellikler
 
-1. Install dependencies
+- **Framework**: React Native + Expo (SDK 54+ Güncel Sürüm)
+- **Navigasyon**: `@react-navigation/native-stack` ile performanslı ve dinamik sayfa yönetimi.
+- **State Yönetimi**: `useState` ve `useEffect` hook'ları ile gerçek zamanlı veri akışı ve reaktif UI güncellemeleri.
+- **Platform**: iOS ve Android uyumlu, cross-platform mimari.
 
-   ```bash
-   npm install
-   ```
+## ✅ Uygulanan Challenge Kriterleri
 
-2. Start the app
+### 🚀 1. Navigasyon (Router & Navigation)
+Uygulama içerisinde toplam **7 farklı ekran** arasında kusursuz ve akıcı bir geçiş yapısı kurulmuştur. `Stack Navigator` kullanılarak aşağıdaki ekranlar yönetilmektedir:
+- **Ana Sayfa (Home)**: Grid yapısında tüm menülere erişim.
+- **BKİ Hesaplama (BKI)**: Kişiselleştirilmiş hesaplama aracı.
+- **Adımsayar (StepCounter)**: Günlük aktivite takibi.
+- **S.S.S. (Faq)**: Sıkça sorulan sorular ve cevaplar.
+- **İletişim (Contact)**: Destek ve iletişim formu.
+- **Profil (Profile)**: Kullanıcı bilgileri ve ayarlar.
+- **Hakkımızda (About)**: Uygulama vizyonu ve geliştirici bilgileri.
 
-   ```bash
-   npx expo start
-   ```
+Orijinal tasarımda yer alan "Profil" ve "Hakkımızda" gibi kritik sayfalar profesyonel bir şekilde entegre edilmiştir.
 
-In the output, you'll find options to open the app in a
+### 📝 2. Veri ve Form Yönetimi
+- **Dinamik Hesaplama**: BKİ ekranında kullanıcıdan boy ve kilo verileri alınarak anlık hesaplama yapılır ve sonuç (Zayıf, Normal, Kilolu vb.) kullanıcıya renk kodları ile sunulur.
+- **Geçmiş Kaydı (History)**: Yapılan hesaplamalar bir liste (array) içerisinde tutularak kullanıcının geçmiş ölçümlerini görmesi sağlanır (State tabanlı geçici hafıza).
+- **Profil Formu**: Profil ekranında `TextInput` bileşenleri ile kullanıcıdan veri girişi alınır ve şifre alanı `secureTextEntry` ile güvenli hale getirilmiştir.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### ⚠️ 3. Hata Yönetimi (Error Handling & Validation)
+- **Form Validasyonu**: BKİ ve İletişim formlarında boş bırakılan alanlar için kullanıcıya anlık uyarılar (Alert) verilir.
+- **Empty State**: Geçmiş hesaplamalar veya veri listeleri boş olduğunda kullanıcıya "Henüz kayıt bulunmamaktadır" şeklinde bilgilendirici özel tasarımlar gösterilir.
+- **Sayısal Giriş Kontrolü**: Boy ve kilo gibi alanlara sadece sayısal değer girilmesi `keyboardType="numeric"` ile zorlanmıştır.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 🎨 4. UI/UX Tasarım
+- **Orijinal Tasarım Dili**: Proje isterlerinde belirtilen **kavisli (rounded) kırmızı header** yapısı tüm sayfalarda tutarlı bir şekilde uygulanmıştır.
+- **Kullanıcı Dostu Arayüz**: Ana sayfada anlaşılır ikonlar ve grid menü yapısı kullanılarak erişilebilirlik artırılmıştır.
+- **Görsel Zenginlik**: İkonlar (`@expo/vector-icons`), gölgelendirmeler (shadow/elevation) ve uyumlu renk paleti ile modern bir görünüm elde edilmiştir.
 
-## Get a fresh project
+## 📦 Kurulum (Installation)
 
-When you're ready, run:
+Projeyi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleyin:
 
-```bash
-npm run reset-project
-```
+1.  **Bağımlılıkları Yükleyin:**
+    ```bash
+    npm install
+    ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2.  **Uygulamayı Başlatın:**
+    ```bash
+    npx expo start
+    ```
+    *(Açılan QR kodu telefonunuzdaki Expo Go uygulaması ile taratabilir veya 'w' tuşuna basarak web tarayıcısında, 'a' ile Android emülatörde çalıştırabilirsiniz.)*
 
-## Learn more
+## 👨‍💻 Geliştirici Notu
+Bu proje geliştirilirken **Clean Code** (Temiz Kod) prensiplerine sadık kalınmıştır. Bileşen tabanlı (Component-Based) mimari benimsenmiş, tekrar eden kod bloklarından kaçınılmış ve her ekran kendi dosyası (`src/screens/`) içerisinde modüler olarak yapılandırılmıştır. Kodun okunabilirliği ve sürdürülebilirliği ön planda tutulmuştur.
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+**Geliştirici**: [Adınız Soyadınız]
+**Tarih**: 2024
